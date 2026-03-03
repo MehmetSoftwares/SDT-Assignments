@@ -40,23 +40,9 @@ public class FileUnitOfWork implements UnitOfWork
         dir.mkdirs();
       }
 
-      File stockFile = new File(directoryPath + "/stocks.txt");
-      if (!stockFile.exists())
-      {
-        stockFile.createNewFile();
-      }
-
-      File portfolioFile = new File(directoryPath + "/portfolios.txt");
-      if (!portfolioFile.exists())
-      {
-        portfolioFile.createNewFile();
-      }
-
-      File ownedStockFile = new File(directoryPath + "/ownedstocks.txt");
-      if (!ownedStockFile.exists())
-      {
-        ownedStockFile.createNewFile();
-      }
+      createFileIfNotExists("/stocks.txt");
+      createFileIfNotExists("/portfolios.txt");
+      createFileIfNotExists("/ownedstocks.txt");
 
     }
     catch (IOException e)
@@ -67,19 +53,38 @@ public class FileUnitOfWork implements UnitOfWork
     }
   }
 
+  private void createFileIfNotExists(String fileName) throws IOException
+  {
+    File file = new File(directoryPath + fileName);
+    if (!file.exists())
+    {
+      file.createNewFile();
+    }
+  }
+
+  private List<String> getValidLines(String fileName)
+  {
+    List<String> validLines = new ArrayList<>();
+    List<String> allLines = readAllLines(directoryPath + fileName);
+
+    for (String line : allLines)
+    {
+      if (!line.trim().isEmpty())
+      {
+        validLines.add(line);
+      }
+    }
+    return validLines;
+  }
+
   public List<Stock> getStocks()
   {
     if (stocks == null)
     {
       stocks = new ArrayList<>();
-      List<String> lines = readAllLines(directoryPath + "/stocks.txt");
-
-      for (String line : lines)
+      for (String line : getValidLines("/stocks.txt"))
       {
-        if (!line.trim().isEmpty())
-        {
-          stocks.add(fromStockPSV(line));
-        }
+        stocks.add(fromStockPSV(line));
       }
     }
     return stocks;
@@ -90,14 +95,9 @@ public class FileUnitOfWork implements UnitOfWork
     if (portfolios == null)
     {
       portfolios = new ArrayList<>();
-      List<String> lines = readAllLines(directoryPath + "/portfolios.txt");
-
-      for (String line : lines)
+      for (String line : getValidLines("/portfolios.txt"))
       {
-        if (!line.trim().isEmpty())
-        {
-          portfolios.add(fromPortfolioPSV(line));
-        }
+        portfolios.add(fromPortfolioPSV(line));
       }
     }
     return portfolios;
@@ -108,14 +108,9 @@ public class FileUnitOfWork implements UnitOfWork
     if (ownedStocks == null)
     {
       ownedStocks = new ArrayList<>();
-      List<String> lines = readAllLines(directoryPath + "/ownedstocks.txt");
-
-      for (String line : lines)
+      for (String line : getValidLines("/ownedstocks.txt"))
       {
-        if (!line.trim().isEmpty())
-        {
-          ownedStocks.add(fromOwnedStockPSV(line));
-        }
+        ownedStocks.add(fromOwnedStockPSV(line));
       }
     }
     return ownedStocks;
@@ -186,18 +181,15 @@ public class FileUnitOfWork implements UnitOfWork
   {
     synchronized (FILE_WRITE_LOCK)
     {
-
       if (stocks != null)
       {
         saveToFile("/stocks.txt", stocks.stream().map(this::toPSV).toList());
       }
-
       if (portfolios != null)
       {
         saveToFile("/portfolios.txt",
             portfolios.stream().map(this::toPSV).toList());
       }
-
       if (ownedStocks != null)
       {
         saveToFile("/ownedstocks.txt",
