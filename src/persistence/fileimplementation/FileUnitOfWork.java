@@ -168,7 +168,7 @@ public class FileUnitOfWork implements UnitOfWork
   }
 
   @Override public void begin()
-  {
+  { // OBS. vær opmærksom på at denne nulstiller in-memory cache — næste læsning henter fra fil
     clearData();
   }
 

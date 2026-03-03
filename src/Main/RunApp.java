@@ -7,7 +7,6 @@ import persistence.fileimplementation.FileOwnedStockDao;
 import persistence.fileimplementation.FilePortfolioDao;
 import persistence.fileimplementation.StockFileDAO;
 import persistence.fileimplementation.FileUnitOfWork;
-import persistence.fileimplementation.StockFileDAO;
 import persistence.interfaces.OwnedStockDao;
 import persistence.interfaces.PortfolioDao;
 import persistence.interfaces.StockDao;

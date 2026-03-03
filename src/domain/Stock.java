@@ -7,6 +7,15 @@ public class Stock {
   private String currentState;
 
   public Stock(String symbol, String name, double currentPrice, String currentState) {
+    if (symbol == null || symbol.isBlank())
+      throw new IllegalArgumentException("Symbol can not be empty");
+    if (name == null || name.isBlank())
+      throw new IllegalArgumentException("Name can not be empty");
+    if (currentPrice < 0)
+      throw new IllegalArgumentException("Price can not be negative");
+    if (currentState == null || currentState.isBlank())
+      throw new IllegalArgumentException("State can not be empty");
+
     this.symbol = symbol;
     this.name = name;
     this.currentPrice = currentPrice;

@@ -11,7 +11,7 @@ public class FileOwnedStockDao implements OwnedStockDao
 {
 
   private FileUnitOfWork uow;
-  private static int nextId = 1;
+  private int nextId = 1;
   private Logger logger = Logger.getInstance();
 
   public FileOwnedStockDao(FileUnitOfWork uow)
