@@ -1,5 +1,7 @@
 package Main;
 
+import business.stockmarket.StockMarket;
+import business.stockmarket.simulation.MarketUpdateThread;
 import domain.OwnedStock;
 import domain.Portfolio;
 import domain.Stock;
@@ -19,13 +21,13 @@ public class RunApp
 {
   public static void main(String[] args)
   {
-
     Logger logger = Logger.getInstance();
     logger.setLogOutput(new ConsoleLogOutput());
     logger.log("INFO", "Application started - Testing Persistence Layer");
 
     try
     {
+      // ─── Assignment 3: Persistence Layer ───────────────────────────
       FileUnitOfWork uow = new FileUnitOfWork("database");
 
       StockDao stockDao = new StockFileDAO(uow);
@@ -64,6 +66,15 @@ public class RunApp
                 + p.getCurrentBalance());
       }
 
+      // ─── Assigment 4: State Pattern / StockMarket ─────────────────
+      System.out.println("\n--- TESTING STOCK MARKET SIMULATION ---");
+
+      StockMarket market = StockMarket.getInstance();
+      market.addNewStock("AAPL");
+      market.addNewStock("GOOG");
+
+      Thread marketThread = new Thread(new MarketUpdateThread());
+      marketThread.start();
     }
     catch (Exception e)
     {
