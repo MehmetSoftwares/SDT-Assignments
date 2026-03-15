@@ -1,5 +1,7 @@
 package Main;
 
+import business.services.StockBankruptService;
+import business.services.StockListenerService;
 import business.stockmarket.StockMarket;
 import business.stockmarket.simulation.MarketUpdateThread;
 import domain.OwnedStock;
@@ -29,6 +31,10 @@ public class RunApp
     {
       // ─── Assignment 3: Persistence Layer ───────────────────────────
       FileUnitOfWork uow = new FileUnitOfWork("database");
+
+      // Ryd gamle testdata
+      uow.begin();
+      uow.commit();
 
       StockDao stockDao = new StockFileDAO(uow);
       PortfolioDao portfolioDao = new FilePortfolioDao(uow);
@@ -66,15 +72,38 @@ public class RunApp
                 + p.getCurrentBalance());
       }
 
-      // ─── Assigment 4: State Pattern / StockMarket ─────────────────
+      // ─── Assignment 4: State Pattern / StockMarket ─────────────────
       System.out.println("\n--- TESTING STOCK MARKET SIMULATION ---");
 
       StockMarket market = StockMarket.getInstance();
-      market.addNewStock("AAPL");
-      market.addNewStock("GOOG");
+
+            uow.begin();
+      Stock google = new Stock("GOOG", "Alphabet Inc.", 120.0, "Steady");
+      stockDao.create(google);
+      uow.commit();
+
+      // Brug addExistingStock så priserne matcher databasen
+      market.addExistingStock(apple);
+      market.addExistingStock(google);
+
+      // ─── Assignment 5: Observer Pattern ──────────────────────────
+      System.out.println("\n--- TESTING OBSERVER PATTERN ---");
+
+      StockListenerService stockListenerService = new StockListenerService(uow,
+          stockDao);
+      market.addListener(stockListenerService);
+
+      stockListenerService.addListener(
+          event -> System.out.println("UI UPDATE: " + event.symbol()
+              + " → " + event.currentPrice() + " [" + event.stateName() + "]")
+      );
+
+      StockBankruptService stockBankruptService = new StockBankruptService(uow, ownedStockDao);
+      market.addListener(stockBankruptService);
 
       Thread marketThread = new Thread(new MarketUpdateThread());
       marketThread.start();
+
     }
     catch (Exception e)
     {

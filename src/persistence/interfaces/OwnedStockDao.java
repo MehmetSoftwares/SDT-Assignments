@@ -9,5 +9,5 @@ public interface OwnedStockDao {
   List<OwnedStock> getAll();
   void update(OwnedStock ownedStock);
   void delete(int id);
-
+  List<OwnedStock> getByStockSymbol(String stockSymbol);
 }

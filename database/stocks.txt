@@ -1,2 +1,8 @@
+AAPL|Apple Inc.|152.59655502562987|Steady
 AAPL|Apple Inc.|150.0|Active
 AAPL|Apple Inc.|150.0|Active
+GOOG|Alphabet Inc.|123.18931621589897|Steady
+AAPL|Apple Inc.|150.0|Active
+GOOG|Alphabet Inc.|120.0|Steady
+AAPL|Apple Inc.|150.0|Active
+GOOG|Alphabet Inc.|120.0|Steady

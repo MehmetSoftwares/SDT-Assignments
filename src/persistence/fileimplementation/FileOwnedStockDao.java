@@ -103,4 +103,16 @@ public class FileOwnedStockDao implements OwnedStockDao
     }
     return result;
   }
+  @Override public List<OwnedStock> getByStockSymbol(String stockSymbol)
+  {
+    List<OwnedStock> result = new ArrayList<>();
+    for (OwnedStock os : uow.getOwnedStocks())
+    {
+      if (os.getStockSymbol().equals(stockSymbol))
+      {
+        result.add(os);
+      }
+    }
+    return result;
+  }
 }
