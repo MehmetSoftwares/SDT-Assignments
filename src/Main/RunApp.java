@@ -1,19 +1,26 @@
 package Main;
 
+import business.dtos.BuyStockRequest;
+import business.dtos.SellStockRequest;
+import business.services.PortfolioQueryService;
 import business.services.StockBankruptService;
 import business.services.StockListenerService;
+import business.services.StockTradingService;
 import business.stockmarket.StockMarket;
 import business.stockmarket.simulation.MarketUpdateThread;
 import domain.OwnedStock;
 import domain.Portfolio;
 import domain.Stock;
+import domain.Transaction;
 import persistence.fileimplementation.FileOwnedStockDao;
 import persistence.fileimplementation.FilePortfolioDao;
 import persistence.fileimplementation.StockFileDAO;
+import persistence.fileimplementation.TransactionFileDAO;
 import persistence.fileimplementation.FileUnitOfWork;
 import persistence.interfaces.OwnedStockDao;
 import persistence.interfaces.PortfolioDao;
 import persistence.interfaces.StockDao;
+import persistence.interfaces.TransactionDao;
 import shared.logging.ConsoleLogOutput;
 import shared.logging.Logger;
 
@@ -32,25 +39,25 @@ public class RunApp
       // ─── Assignment 3: Persistence Layer ───────────────────────────
       FileUnitOfWork uow = new FileUnitOfWork("database");
 
-      // Ryd gamle testdata
       uow.begin();
       uow.commit();
 
       StockDao stockDao = new StockFileDAO(uow);
       PortfolioDao portfolioDao = new FilePortfolioDao(uow);
       OwnedStockDao ownedStockDao = new FileOwnedStockDao(uow);
+      TransactionDao transactionDao = new TransactionFileDAO(uow);
 
       logger.log("INFO", "Starting transaction to create data...");
       uow.begin();
 
-      Stock apple = new Stock("AAPL", "Apple Inc.", 150.0, "Active");
+      Stock apple = new Stock("AAPL", "Apple Inc.", 150.0, "Steady");
       stockDao.create(apple);
+
+      Stock google = new Stock("GOOG", "Alphabet Inc.", 120.0, "Steady");
+      stockDao.create(google);
 
       Portfolio myPortfolio = new Portfolio(0, 10000.0);
       portfolioDao.create(myPortfolio);
-
-      OwnedStock purchase = new OwnedStock(0, 1, "AAPL", 10);
-      ownedStockDao.create(purchase);
 
       uow.commit();
       logger.log("INFO", "Data committed successfully to files.");
@@ -77,12 +84,6 @@ public class RunApp
 
       StockMarket market = StockMarket.getInstance();
 
-            uow.begin();
-      Stock google = new Stock("GOOG", "Alphabet Inc.", 120.0, "Steady");
-      stockDao.create(google);
-      uow.commit();
-
-      // Brug addExistingStock så priserne matcher databasen
       market.addExistingStock(apple);
       market.addExistingStock(google);
 
@@ -98,12 +99,48 @@ public class RunApp
               + " → " + event.currentPrice() + " [" + event.stateName() + "]")
       );
 
-      StockBankruptService stockBankruptService = new StockBankruptService(uow, ownedStockDao);
+      StockBankruptService stockBankruptService = new StockBankruptService(uow,
+          ownedStockDao);
       market.addListener(stockBankruptService);
+
+      // ─── Assignment 6: Transaction Script Pattern ────────────────
+      System.out.println("\n--- TESTING BUY & SELL ---");
+
+      StockTradingService tradingService = new StockTradingService(
+          uow, stockDao, portfolioDao, ownedStockDao, transactionDao);
+      PortfolioQueryService queryService = new PortfolioQueryService(
+          uow, stockDao, portfolioDao, ownedStockDao, transactionDao);
+
+      System.out.println("Balance before: " + queryService.getBalance(1));
+
+      tradingService.buyShares(new BuyStockRequest(1, "AAPL", 5));
+      System.out.println("Balance after buying 5 AAPL: "
+          + queryService.getBalance(1));
+
+      tradingService.sellShares(new SellStockRequest(1, "AAPL", 2));
+      System.out.println("Balance after selling 2 AAPL: "
+          + queryService.getBalance(1));
+
+      System.out.println("Owned stocks:");
+      for (OwnedStock os : queryService.getOwnedStocks(1))
+      {
+        System.out.println("  " + os.getStockSymbol()
+            + " x" + os.getNumberOfShares());
+      }
+
+      System.out.println("Total portfolio value: "
+          + queryService.getTotalPortfolioValue(1));
+
+      System.out.println("Transaction history:");
+      for (Transaction t : queryService.getTransactionHistory(1))
+      {
+        System.out.println("  " + t.getType() + " " + t.getQuantity()
+            + " " + t.getStockSymbol() + " @ " + t.getPricePerShare()
+            + " (fee: " + t.getFee() + ")");
+      }
 
       Thread marketThread = new Thread(new MarketUpdateThread());
       marketThread.start();
-
     }
     catch (Exception e)
     {

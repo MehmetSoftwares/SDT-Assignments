@@ -1,8 +1,10 @@
-AAPL|Apple Inc.|152.59655502562987|Steady
+AAPL|Apple Inc.|154.02326506549755|Steady
 AAPL|Apple Inc.|150.0|Active
 AAPL|Apple Inc.|150.0|Active
-GOOG|Alphabet Inc.|123.18931621589897|Steady
+GOOG|Alphabet Inc.|150.17681052572718|Growing
 AAPL|Apple Inc.|150.0|Active
 GOOG|Alphabet Inc.|120.0|Steady
 AAPL|Apple Inc.|150.0|Active
+GOOG|Alphabet Inc.|120.0|Steady
+AAPL|Apple Inc.|150.0|Steady
 GOOG|Alphabet Inc.|120.0|Steady

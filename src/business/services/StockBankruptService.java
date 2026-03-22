@@ -7,45 +7,48 @@ import persistence.interfaces.OwnedStockDao;
 import persistence.interfaces.UnitOfWork;
 import shared.logging.Logger;
 
-import java.util.List;
-
-public class StockBankruptService implements StockUpdateListener {
+public class StockBankruptService implements StockUpdateListener
+{
 
   private final UnitOfWork uow;
   private final OwnedStockDao ownedStockDao;
   private final Logger logger = Logger.getInstance();
 
-  public StockBankruptService(UnitOfWork uow, OwnedStockDao ownedStockDao) {
+  public StockBankruptService(UnitOfWork uow, OwnedStockDao ownedStockDao)
+  {
     this.uow = uow;
     this.ownedStockDao = ownedStockDao;
   }
 
-  @Override
-  public void onStockUpdate(StockUpdateEvent event) {
-    if (!event.isBankrupt()) {
+  @Override public void onStockUpdate(StockUpdateEvent event)
+  {
+    if (!event.isBankrupt())
+    {
       return;
     }
 
-    try {
+    try
+    {
       uow.begin();
 
-      List<OwnedStock> ownedStocks = ownedStockDao.getByStockSymbol(event.symbol());
-
-      for (OwnedStock owned : ownedStocks) {
+      OwnedStock owned = ownedStockDao.getByStockSymbol(event.symbol());
+      if (owned != null)
+      {
         ownedStockDao.delete(owned.getId());
         logger.log("INFO",
-            "Player lost " + owned.getNumberOfShares()
-                + " shares of " + event.symbol()
-                + " due to bankruptcy");
+            "Player lost " + owned.getNumberOfShares() + " shares of "
+                + event.symbol() + " due to bankruptcy");
       }
 
       uow.commit();
 
-    } catch (Exception e) {
+    }
+    catch (Exception e)
+    {
       uow.rollback();
       logger.log("ERROR",
-          "Failed to handle bankruptcy for " + event.symbol()
-              + ": " + e.getMessage());
+          "Failed to handle bankruptcy for " + event.symbol() + ": "
+              + e.getMessage());
     }
   }
 }

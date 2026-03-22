@@ -3,6 +3,7 @@ package persistence.fileimplementation;
 import domain.OwnedStock;
 import domain.Portfolio;
 import domain.Stock;
+import domain.Transaction;
 import persistence.interfaces.UnitOfWork;
 import shared.logging.Logger;
 
@@ -10,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,7 @@ public class FileUnitOfWork implements UnitOfWork
   private List<Stock> stocks;
   private List<Portfolio> portfolios;
   private List<OwnedStock> ownedStocks;
+  private List<Transaction> transactions;
 
   public FileUnitOfWork(String directoryPath)
   {
@@ -43,7 +46,7 @@ public class FileUnitOfWork implements UnitOfWork
       createFileIfNotExists("/stocks.txt");
       createFileIfNotExists("/portfolios.txt");
       createFileIfNotExists("/ownedstocks.txt");
-
+      createFileIfNotExists("/transactions.txt");
     }
     catch (IOException e)
     {
@@ -116,6 +119,19 @@ public class FileUnitOfWork implements UnitOfWork
     return ownedStocks;
   }
 
+  public List<Transaction> getTransactions()
+  {
+    if (transactions == null)
+    {
+      transactions = new ArrayList<>();
+      for (String line : getValidLines("/transactions.txt"))
+      {
+        transactions.add(fromTransactionPSV(line));
+      }
+    }
+    return transactions;
+  }
+
   private List<String> readAllLines(String filePath)
   {
     try
@@ -167,8 +183,27 @@ public class FileUnitOfWork implements UnitOfWork
         Integer.parseInt(parts[1]), parts[2], Integer.parseInt(parts[3]));
   }
 
+  private String toPSV(Transaction transaction)
+  {
+    return transaction.getId() + "|" + transaction.getPortfolioId() + "|"
+        + transaction.getStockSymbol() + "|" + transaction.getType() + "|"
+        + transaction.getQuantity() + "|" + transaction.getPricePerShare()
+        + "|" + transaction.getTotalAmount() + "|" + transaction.getFee()
+        + "|" + transaction.getTimestamp();
+  }
+
+  private Transaction fromTransactionPSV(String psv)
+  {
+    String[] parts = psv.split("\\|");
+    return new Transaction(Integer.parseInt(parts[0]),
+        Integer.parseInt(parts[1]), parts[2], parts[3],
+        Integer.parseInt(parts[4]), Double.parseDouble(parts[5]),
+        Double.parseDouble(parts[6]), Double.parseDouble(parts[7]),
+        LocalDateTime.parse(parts[8]));
+  }
+
   @Override public void begin()
-  { // OBS. vær opmærksom på at denne nulstiller in-memory cache — næste læsning henter fra fil
+  {
     clearData();
   }
 
@@ -195,6 +230,11 @@ public class FileUnitOfWork implements UnitOfWork
         saveToFile("/ownedstocks.txt",
             ownedStocks.stream().map(this::toPSV).toList());
       }
+      if (transactions != null)
+      {
+        saveToFile("/transactions.txt",
+            transactions.stream().map(this::toPSV).toList());
+      }
     }
     clearData();
   }
@@ -217,5 +257,6 @@ public class FileUnitOfWork implements UnitOfWork
     this.stocks = null;
     this.portfolios = null;
     this.ownedStocks = null;
+    this.transactions = null;
   }
 }
