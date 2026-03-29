@@ -5,7 +5,7 @@ public class AppConfig
   private static AppConfig instance;
 
   private final int startingBalance;
-  private final double transactionFee;
+  private double transactionFee;
   private final int updateFrequencyInMs;
   private final double stockResetValue;
 
@@ -43,5 +43,9 @@ public class AppConfig
   public double getStockResetValue()
   {
     return stockResetValue;
+  }
+
+  public void setTransactionFee(double transactionFee) {
+    this.transactionFee = transactionFee;
   }
 }
