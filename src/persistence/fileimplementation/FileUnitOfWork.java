@@ -1,5 +1,9 @@
 package persistence.fileimplementation;
 
+import persistence.interfaces.StockDao;
+import persistence.interfaces.PortfolioDao;
+import persistence.interfaces.OwnedStockDao;
+import persistence.interfaces.TransactionDao;
 import domain.OwnedStock;
 import domain.Portfolio;
 import domain.Stock;
@@ -27,11 +31,25 @@ public class FileUnitOfWork implements UnitOfWork
   private List<OwnedStock> ownedStocks;
   private List<Transaction> transactions;
 
+  private final StockDao stockDao;
+  private final PortfolioDao portfolioDao;
+  private final OwnedStockDao ownedStockDao;
+  private final TransactionDao transactionDao;
+
   public FileUnitOfWork(String directoryPath)
   {
     this.directoryPath = directoryPath;
     ensureFilesExist();
+    this.stockDao = new StockFileDAO(this);
+    this.portfolioDao = new FilePortfolioDao(this);
+    this.ownedStockDao = new FileOwnedStockDao(this);
+    this.transactionDao = new TransactionFileDAO(this);
   }
+
+  @Override public StockDao getStockDao() { return stockDao; }
+  @Override public PortfolioDao getPortfolioDao() { return portfolioDao; }
+  @Override public OwnedStockDao getOwnedStockDao() { return ownedStockDao; }
+  @Override public TransactionDao getTransactionDao() { return transactionDao; }
 
   private void ensureFilesExist()
   {
@@ -236,6 +254,11 @@ public class FileUnitOfWork implements UnitOfWork
             transactions.stream().map(this::toPSV).toList());
       }
     }
+    clearData();
+  }
+
+  @Override public void refresh()
+  {
     clearData();
   }
 

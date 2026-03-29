@@ -18,9 +18,9 @@ public class StockListenerService implements StockUpdateListener {
   private final Logger logger = Logger.getInstance();
   private final List<StockChangeListener> listeners = new ArrayList<>();
 
-  public StockListenerService(UnitOfWork uow, StockDao stockDao) {
+  public StockListenerService(UnitOfWork uow) {
     this.uow = uow;
-    this.stockDao = stockDao;
+    this.stockDao = uow.getStockDao();
   }
 
   public void addListener(StockChangeListener listener) {

@@ -14,10 +14,9 @@ public class StockBankruptService implements StockUpdateListener
   private final OwnedStockDao ownedStockDao;
   private final Logger logger = Logger.getInstance();
 
-  public StockBankruptService(UnitOfWork uow, OwnedStockDao ownedStockDao)
-  {
+  public StockBankruptService(UnitOfWork uow) {
     this.uow = uow;
-    this.ownedStockDao = ownedStockDao;
+    this.ownedStockDao = uow.getOwnedStockDao();
   }
 
   @Override public void onStockUpdate(StockUpdateEvent event)

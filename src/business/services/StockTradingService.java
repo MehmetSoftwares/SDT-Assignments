@@ -26,15 +26,13 @@ public class StockTradingService {
     private final Logger logger = Logger.getInstance();
     private final AppConfig config = AppConfig.getInstance();
 
-    public StockTradingService(UnitOfWork uow, StockDao stockDao,
-            PortfolioDao portfolioDao, OwnedStockDao ownedStockDao,
-            TransactionDao transactionDao) {
-        this.uow = uow;
-        this.stockDao = stockDao;
-        this.portfolioDao = portfolioDao;
-        this.ownedStockDao = ownedStockDao;
-        this.transactionDao = transactionDao;
-    }
+  public StockTradingService(UnitOfWork uow) {
+    this.uow = uow;
+    this.stockDao = uow.getStockDao();
+    this.portfolioDao = uow.getPortfolioDao();
+    this.ownedStockDao = uow.getOwnedStockDao();
+    this.transactionDao = uow.getTransactionDao();
+  }
 
     public void buyShares(BuyStockRequest request) {
         try {
@@ -56,16 +54,18 @@ public class StockTradingService {
                     "Cannot buy bankrupt stock: " + request.stockSymbol());
             }
 
-            double pricePerShare = stock.getCurrentPrice();
-            double subtotal = pricePerShare * request.numberOfShares();
-            double fee = subtotal * config.getTransactionFee();
-            double totalCost = subtotal + fee;
-
             Portfolio portfolio = portfolioDao.getById(request.portfolioId());
             if (portfolio == null) {
                 throw new IllegalArgumentException(
                     "Portfolio not found: " + request.portfolioId());
             }
+
+            double pricePerShare = stock.getCurrentPrice();
+            double subtotal = pricePerShare * request.numberOfShares();
+            double feeRate = config.getTransactionFee();
+            double feeAmount = subtotal * feeRate;
+            double totalCost = subtotal + feeAmount;
+
             if (portfolio.getCurrentBalance() < totalCost) {
                 throw new IllegalArgumentException(
                     "Insufficient balance. Need: " + totalCost
@@ -92,7 +92,7 @@ public class StockTradingService {
             Transaction transaction = new Transaction(
                 0, request.portfolioId(), request.stockSymbol(),
                 "BUY", request.numberOfShares(), pricePerShare,
-                totalCost, fee, LocalDateTime.now());
+                totalCost, feeAmount, LocalDateTime.now());
             transactionDao.create(transaction);
 
             uow.commit();
@@ -137,16 +137,17 @@ public class StockTradingService {
                         + owned.getNumberOfShares());
             }
 
-            double pricePerShare = stock.getCurrentPrice();
-            double subtotal = pricePerShare * request.numberOfShares();
-            double fee = subtotal * config.getTransactionFee();
-            double totalRevenue = subtotal - fee;
-
             Portfolio portfolio = portfolioDao.getById(request.portfolioId());
             if (portfolio == null) {
                 throw new IllegalArgumentException(
                     "Portfolio not found: " + request.portfolioId());
             }
+
+            double pricePerShare = stock.getCurrentPrice();
+            double subtotal = pricePerShare * request.numberOfShares();
+            double feeRate = config.getTransactionFee();
+            double feeAmount = subtotal * feeRate;
+            double totalRevenue = subtotal - feeAmount;
 
             int remainingShares = owned.getNumberOfShares()
                 - request.numberOfShares();
@@ -164,7 +165,7 @@ public class StockTradingService {
             Transaction transaction = new Transaction(
                 0, request.portfolioId(), request.stockSymbol(),
                 "SELL", request.numberOfShares(), pricePerShare,
-                totalRevenue, fee, LocalDateTime.now());
+                totalRevenue, feeAmount, LocalDateTime.now());
             transactionDao.create(transaction);
 
             uow.commit();

@@ -42,10 +42,9 @@ public class RunApp
       uow.begin();
       uow.commit();
 
-      StockDao stockDao = new StockFileDAO(uow);
-      PortfolioDao portfolioDao = new FilePortfolioDao(uow);
-      OwnedStockDao ownedStockDao = new FileOwnedStockDao(uow);
-      TransactionDao transactionDao = new TransactionFileDAO(uow);
+      StockDao stockDao = uow.getStockDao();
+      PortfolioDao portfolioDao = uow.getPortfolioDao();
+      OwnedStockDao ownedStockDao = uow.getOwnedStockDao();
 
       logger.log("INFO", "Starting transaction to create data...");
       uow.begin();
@@ -90,8 +89,7 @@ public class RunApp
       // ─── Assignment 5: Observer Pattern ──────────────────────────
       System.out.println("\n--- TESTING OBSERVER PATTERN ---");
 
-      StockListenerService stockListenerService = new StockListenerService(uow,
-          stockDao);
+      StockListenerService stockListenerService = new StockListenerService(uow);
       market.addListener(stockListenerService);
 
       stockListenerService.addListener(
@@ -99,17 +97,13 @@ public class RunApp
               + " → " + event.currentPrice() + " [" + event.stateName() + "]")
       );
 
-      StockBankruptService stockBankruptService = new StockBankruptService(uow,
-          ownedStockDao);
+      StockBankruptService stockBankruptService = new StockBankruptService(uow);
       market.addListener(stockBankruptService);
 
       // ─── Assignment 6: Transaction Script Pattern ────────────────
       System.out.println("\n--- TESTING BUY & SELL ---");
-
-      StockTradingService tradingService = new StockTradingService(
-          uow, stockDao, portfolioDao, ownedStockDao, transactionDao);
-      PortfolioQueryService queryService = new PortfolioQueryService(
-          uow, stockDao, portfolioDao, ownedStockDao, transactionDao);
+      StockTradingService tradingService = new StockTradingService(uow);
+      PortfolioQueryService queryService = new PortfolioQueryService(uow);
 
       System.out.println("Balance before: " + queryService.getBalance(1));
 
