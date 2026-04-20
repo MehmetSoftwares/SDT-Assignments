@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="presentation.views.portfolio.PortfolioController"
+      spacing="10"
+      style="-fx-padding: 15;">
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Portfolio" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+        <Button fx:id="marketButton" text="← Stock Market"/>
+    </HBox>
+
+    <HBox spacing="8">
+        <Label text="Balance:"/>
+        <Label fx:id="balanceLabel" text="0.00"/>
+    </HBox>
+
+    <HBox spacing="8">
+        <Label text="Total Value:"/>
+        <Label fx:id="totalValueLabel" text="0.00"/>
+    </HBox>
+
+    <TableView fx:id="ownedStocksTable" prefHeight="200">
+        <columns>
+            <TableColumn fx:id="symbolColumn" text="Symbol" prefWidth="150"/>
+            <TableColumn fx:id="sharesColumn" text="Shares" prefWidth="100"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="8">
+        <TextField fx:id="sellSymbolInput" promptText="Symbol"/>
+        <TextField fx:id="sellQuantityInput" promptText="Quantity"/>
+        <Button fx:id="sellButton" text="Sell"/>
+    </HBox>
+</VBox>

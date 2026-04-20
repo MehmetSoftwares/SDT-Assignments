@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.chart.LineChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.chart.CategoryAxis?>
+
+<VBox xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="presentation.views.stockmarket.StockMarketController"
+      spacing="10"
+      style="-fx-padding: 15;">
+
+    <HBox spacing="15" alignment="CENTER_LEFT">
+        <Label text="Stock Market" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+        <Label text="Balance: " style="-fx-font-size: 14;"/>
+        <Label fx:id="balanceLabel" text="-" style="-fx-font-size: 14; -fx-font-weight: bold;"/>
+    </HBox>
+
+    <HBox spacing="15">
+        <ListView fx:id="availableStocksList" prefWidth="160" prefHeight="320"/>
+
+        <VBox spacing="10">
+            <Label fx:id="priceLabel" text="Price: -"/>
+            <Label fx:id="stateLabel" text="State: -"/>
+            <Label fx:id="statusLabel" text=""/>
+            <TextField fx:id="sharesInput" promptText="Number of shares"/>
+            <Button fx:id="buyButton" text="Buy"/>
+            <Button fx:id="portfolioButton" text="Portfolio →"/>
+
+            <LineChart fx:id="priceChart" prefWidth="420" prefHeight="220" animated="false">
+                <xAxis>
+                    <CategoryAxis label="Time"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis label="Price"/>
+                </yAxis>
+            </LineChart>
+        </VBox>
+    </HBox>
+</VBox>
