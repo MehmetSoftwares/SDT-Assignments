@@ -1,0 +1,2 @@
+AAPL|Apple|100.0|Steady
+DEAD|DeadCorp|50.0|Bankrupt
