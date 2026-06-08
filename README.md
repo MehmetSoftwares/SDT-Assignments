@@ -4,7 +4,7 @@ Dette repository indeholder et "Stock Trading Game" udviklet som semesterprojekt
 
 ## 🚀 Projektstatus
 
-**Nuværende status:** Færdig — alle assignments afleveret (Assignment 1–11).
+**Nuværende status:** Færdig — alle assignments gennemført (Assignment 1–11).
 
 ### Færdige assignments
 
